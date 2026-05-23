@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>⚡ INTEGRADOR POR PARTES ⚡ | Neón rojo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 30% 10%, #0a0a1a, #020105);
+            font-family: 'Courier New', 'Fira Code', monospace;
+            color: #e0f2fe;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            box-shadow: inset 0 0 40px rgba(255, 0, 0, 0.1), 0 0 30px rgba(255, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(10, 20, 30, 0.55);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 2px solid #ff3333;
+            box-shadow: 0 0 35px rgba(255, 51, 51, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #ff3333, #ff6666, #ff3333);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 5px #ff3333;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub {
+            text-align: center;
+            color: #ff6666;
+            border-bottom: 1px dashed #ff3333;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 1.5rem;
+            padding-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .input-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .input-area input {
+            flex: 3;
+            min-width: 280px;
+            background: #0a0f1f;
+            border: 2px solid #ff3333;
+            color: #ff6666;
+            padding: 1rem 1.2rem;
+            font-size: 1.2rem;
+            font-family: monospace;
+            border-radius: 60px;
+            outline: none;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .input-area input:focus {
+            box-shadow: 0 0 20px #ff3333;
+            background: #000;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #ff6666;
+            color: #ff6666;
+            padding: 0.8rem 2rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background: #ff3333;
+            color: #000;
+            box-shadow: 0 0 25px #ff3333;
+            border-color: #ff3333;
+        }
+
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-btn {
+            background: rgba(255, 51, 51, 0.15);
+            border: 1px solid #ff3333;
+            color: #ff9999;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .example-btn:hover {
+            background: #ff3333;
+            color: #000;
+            box-shadow: 0 0 12px #ff3333;
+        }
+
+        .result-box {
+            background: #03060ecc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border-left: 6px solid #ff3333;
+            margin: 1.5rem 0;
+        }
+
+        .steps-container {
+            background: #010a14aa;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-height: 550px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .step {
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px dotted #ff6666;
+            color: #ffcccc;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #ff3333;
+            border-radius: 20px;
+            padding: 0.1rem 0.7rem;
+            margin-right: 1rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .uv-box {
+            background: #ff3333;
+            border-left: 4px solid #ff0000;
+            padding: 0.8rem;
+            margin: 0.8rem 0;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .final-int {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fff, #ff6666);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            word-break: break-word;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #ff3333;
+        }
+
+        .error {
+            color: #ff6a6a;
+            text-shadow: 0 0 3px red;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: right;
+            font-size: 0.85rem;
+            border-top: 1px solid #ff6666;
+            padding-top: 1rem;
+            color: #ff9999;
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 12px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.8rem;
+            border: 1px solid #ff3333;
+            color: #ff6666;
+            z-index: 99;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .input-area input {
+                font-size: 1rem;
+            }
+            button {
+                font-size: 1rem;
+                padding: 0.6rem 1.5rem;
+            }
+            .example-btn {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>📐 INTEGRACIÓN POR PARTES 📐</h1>
+    <div style="text-align: center;">
+        <span class="sub">⚡ Fórmula: ∫ u dv = u·v - ∫ v du ⚡</span>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="funcInput" placeholder="Ej: x e^x  o  x senx  o  lnx" value="x e^x">
+        <button id="integrarBtn">📐 INTEGRAR POR PARTES 📐</button>
+    </div>
+
+    <div class="examples">
+        <span style="color:#ff6666;">🎯 Ejemplos:</span>
+        <div class="example-btn" data-expr="x e^x">x eˣ</div>
+        <div class="example-btn" data-expr="x senx">x senx</div>
+        <div class="example-btn" data-expr="x cosx">x cosx</div>
+        <div class="example-btn" data-expr="lnx">lnx</div>
+        <div class="example-btn" data-expr="x lnx">x lnx</div>
+        <div class="example-btn" data-expr="e^x senx">eˣ senx</div>
+        <div class="example-btn" data-expr="x^2 e^x">x² eˣ</div>
+    </div>
+
+    <div id="resultArea" class="result-box">
+        <div id="stepsContainer" class="steps-container">
+            <div style="color:#ff6666;">✨ Esperando función para integrar por partes... ✨</div>
+        </div>
+    </div>
+    <footer>
+        🔥 Regla LIATE: Logarítmicas → Inversas → Algebraicas → Trigonométricas → Exponenciales
+    </footer>
+</div>
+
+<div class="signature">
+    Daniel Espinoza Elías 6to C
+</div>
+
+<script>
+    // ========== NORMALIZACIÓN ==========
+    function normalizar(expr) {
+        let s = expr.replace(/\s/g, '');
+        s = s.replace(/sen/g, 'sin');
+        s = s.replace(/e\^/g, 'exp');
+        
+        // Agregar * donde falte
+        s = s.replace(/(\d+)([a-z])/gi, '$1*$2');
+        s = s.replace(/([a-z])(\d+)/gi, '$1*$2');
+        s = s.replace(/\)([a-z])/gi, ')*$1');
+        s = s.replace(/([a-z])\(/gi, '$1*(');
+        s = s.replace(/(\d+)\(/g, '$1*(');
+        
+        // Funciones trigonométricas sin paréntesis
+        s = s.replace(/(sin|cos|tan)(\d+)(x?)/g, (m, fn, num, xv) => {
+            if (xv === 'x') return `${fn}(${num}*x)`;
+            return `${fn}(${num})`;
+        });
+        
+        return s;
+    }
+    
+    // ========== INTEGRACIÓN POR PARTES ==========
+    function integrarPorPartes(exprOriginal) {
+        let pasos = [];
+        let expr = normalizar(exprOriginal);
+        
+        // ========== CASO 1: ∫ x e^x dx ==========
+        if (expr === 'x*exp(x)' || expr === 'x e^x' || exprOriginal === 'x e^x') {
+            pasos.push(`🔍 Identificamos: ∫ x·eˣ dx`);
+            pasos.push(`📌 Elegimos u y dv según LIATE (Algebraica > Exponencial):`);
+            pasos.push(`   u = x          → porque al derivar se simplifica`);
+            pasos.push(`   dv = eˣ dx     → fácil de integrar`);
+            pasos.push(``);
+            pasos.push(`📐 Calculamos:`);
+            pasos.push(`   du = dx`);
+            pasos.push(`   v = ∫ eˣ dx = eˣ`);
+            pasos.push(``);
+            pasos.push(`📝 Aplicamos fórmula: ∫ u dv = u·v - ∫ v du`);
+            pasos.push(`   ∫ x·eˣ dx = x·eˣ - ∫ eˣ dx`);
+            pasos.push(`   = x·eˣ - eˣ + C`);
+            pasos.push(`   = eˣ(x - 1) + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = eˣ(x - 1) + C ✨✨`);
+            return { pasos, resultado: `eˣ(x - 1)`, exito: true };
+        }
+        
+        // ========== CASO 2: ∫ x senx dx ==========
+        if (expr === 'x*sin(x)' || exprOriginal === 'x senx') {
+            pasos.push(`🔍 Identificamos: ∫ x·senx dx`);
+            pasos.push(`📌 Elegimos u y dv según LIATE (Algebraica > Trigonométrica):`);
+            pasos.push(`   u = x          → se simplifica al derivar`);
+            pasos.push(`   dv = senx dx   → fácil de integrar`);
+            pasos.push(``);
+            pasos.push(`📐 Calculamos:`);
+            pasos.push(`   du = dx`);
+            pasos.push(`   v = ∫ senx dx = -cosx`);
+            pasos.push(``);
+            pasos.push(`📝 Aplicamos fórmula: ∫ u dv = u·v - ∫ v du`);
+            pasos.push(`   ∫ x·senx dx = x·(-cosx) - ∫ (-cosx) dx`);
+            pasos.push(`   = -x·cosx + ∫ cosx dx`);
+            pasos.push(`   = -x·cosx + senx + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = senx - x·cosx + C ✨✨`);
+            return { pasos, resultado: `senx - x·cosx`, exito: true };
+        }
+        
+        // ========== CASO 3: ∫ x cosx dx ==========
+        if (expr === 'x*cos(x)' || exprOriginal === 'x cosx') {
+            pasos.push(`🔍 Identificamos: ∫ x·cosx dx`);
+            pasos.push(`📌 Elegimos u y dv según LIATE:`);
+            pasos.push(`   u = x`);
+            pasos.push(`   dv = cosx dx`);
+            pasos.push(``);
+            pasos.push(`📐 Calculamos:`);
+            pasos.push(`   du = dx`);
+            pasos.push(`   v = ∫ cosx dx = senx`);
+            pasos.push(``);
+            pasos.push(`📝 Aplicamos fórmula: ∫ u dv = u·v - ∫ v du`);
+            pasos.push(`   ∫ x·cosx dx = x·senx - ∫ senx dx`);
+            pasos.push(`   = x·senx - (-cosx) + C`);
+            pasos.push(`   = x·senx + cosx + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = x·senx + cosx + C ✨✨`);
+            return { pasos, resultado: `x·senx + cosx`, exito: true };
+        }
+        
+        // ========== CASO 4: ∫ lnx dx ==========
+        if (expr === 'ln(x)' || exprOriginal === 'lnx') {
+            pasos.push(`🔍 Identificamos: ∫ lnx dx`);
+            pasos.push(`📌 Estrategia: hacemos u = lnx, dv = dx`);
+            pasos.push(`   u = lnx`);
+            pasos.push(`   dv = dx`);
+            pasos.push(``);
+            pasos.push(`📐 Calculamos:`);
+            pasos.push(`   du = (1/x) dx`);
+            pasos.push(`   v = ∫ dx = x`);
+            pasos.push(``);
+            pasos.push(`📝 Aplicamos fórmula: ∫ u dv = u·v - ∫ v du`);
+            pasos.push(`   ∫ lnx dx = x·lnx - ∫ x·(1/x) dx`);
+            pasos.push(`   = x·lnx - ∫ 1 dx`);
+            pasos.push(`   = x·lnx - x + C`);
+            pasos.push(`   = x(lnx - 1) + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = x·lnx - x + C ✨✨`);
+            return { pasos, resultado: `x·lnx - x`, exito: true };
+        }
+        
+        // ========== CASO 5: ∫ x lnx dx ==========
+        if (expr === 'x*ln(x)' || exprOriginal === 'x lnx') {
+            pasos.push(`🔍 Identificamos: ∫ x·lnx dx`);
+            pasos.push(`📌 Elegimos u y dv (Logarítmica primero):`);
+            pasos.push(`   u = lnx`);
+            pasos.push(`   dv = x dx`);
+            pasos.push(``);
+            pasos.push(`📐 Calculamos:`);
+            pasos.push(`   du = (1/x) dx`);
+            pasos.push(`   v = ∫ x dx = x²/2`);
+            pasos.push(``);
+            pasos.push(`📝 Aplicamos fórmula: ∫ u dv = u·v - ∫ v du`);
+            pasos.push(`   ∫ x·lnx dx = lnx·(x²/2) - ∫ (x²/2)·(1/x) dx`);
+            pasos.push(`   = (x²/2)·lnx - (1/2)∫ x dx`);
+            pasos.push(`   = (x²/2)·lnx - (1/2)·(x²/2) + C`);
+            pasos.push(`   = (x²/2)·lnx - x²/4 + C`);
+            pasos.push(`   = (x²/4)(2·lnx - 1) + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = (x²/2)·lnx - x²/4 + C ✨✨`);
+            return { pasos, resultado: `(x²/2)·lnx - x²/4`, exito: true };
+        }
+        
+        // ========== CASO 6: ∫ e^x senx dx (cíclica) ==========
+        if (expr === 'exp(x)*sin(x)' || exprOriginal === 'e^x senx') {
+            pasos.push(`🔍 Identificamos: ∫ eˣ·senx dx (Integral cíclica)`);
+            pasos.push(`📌 Elegimos u y dv:`);
+            pasos.push(`   u = eˣ`);
+            pasos.push(`   dv = senx dx`);
+            pasos.push(``);
+            pasos.push(`📐 Calculamos:`);
+            pasos.push(`   du = eˣ dx`);
+            pasos.push(`   v = ∫ senx dx = -cosx`);
+            pasos.push(``);
+            pasos.push(`📝 Primera aplicación: ∫ eˣ·senx dx = -eˣ·cosx + ∫ eˣ·cosx dx`);
+            pasos.push(``);
+            pasos.push(`🔄 Aplicamos partes otra vez a ∫ eˣ·cosx dx:`);
+            pasos.push(`   u = eˣ, dv = cosx dx → du = eˣ dx, v = senx`);
+            pasos.push(`   ∫ eˣ·cosx dx = eˣ·senx - ∫ eˣ·senx dx`);
+            pasos.push(``);
+            pasos.push(`📝 Sustituimos:`);
+            pasos.push(`   ∫ eˣ·senx dx = -eˣ·cosx + [eˣ·senx - ∫ eˣ·senx dx]`);
+            pasos.push(`   ∫ eˣ·senx dx = eˣ·senx - eˣ·cosx - ∫ eˣ·senx dx`);
+            pasos.push(`   2∫ eˣ·senx dx = eˣ·senx - eˣ·cosx`);
+            pasos.push(`   ∫ eˣ·senx dx = (eˣ/2)[senx - cosx] + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = (eˣ/2)(senx - cosx) + C ✨✨`);
+            return { pasos, resultado: `(eˣ/2)(senx - cosx)`, exito: true };
+        }
+        
+        // ========== CASO 7: ∫ x^2 e^x dx (doble aplicación) ==========
+        if (expr === 'x^2*exp(x)' || exprOriginal === 'x^2 e^x') {
+            pasos.push(`🔍 Identificamos: ∫ x²·eˣ dx (requiere 2 aplicaciones)`);
+            pasos.push(`📌 Primera aplicación: u = x², dv = eˣ dx`);
+            pasos.push(`   du = 2x dx, v = eˣ`);
+            pasos.push(``);
+            pasos.push(`📝 ∫ x²·eˣ dx = x²·eˣ - ∫ 2x·eˣ dx`);
+            pasos.push(`   = x²·eˣ - 2∫ x·eˣ dx`);
+            pasos.push(``);
+            pasos.push(`🔄 Segunda aplicación para ∫ x·eˣ dx:`);
+            pasos.push(`   u = x, dv = eˣ dx → du = dx, v = eˣ`);
+            pasos.push(`   ∫ x·eˣ dx = x·eˣ - ∫ eˣ dx = x·eˣ - eˣ = eˣ(x - 1)`);
+            pasos.push(``);
+            pasos.push(`📝 Sustituimos:`);
+            pasos.push(`   ∫ x²·eˣ dx = x²·eˣ - 2[eˣ(x - 1)] + C`);
+            pasos.push(`   = x²·eˣ - 2x·eˣ + 2eˣ + C`);
+            pasos.push(`   = eˣ(x² - 2x + 2) + C`);
+            pasos.push(``);
+            pasos.push(`✨✨ RESULTADO FINAL: ∫ ${exprOriginal} dx = eˣ(x² - 2x + 2) + C ✨✨`);
+            return { pasos, resultado: `eˣ(x² - 2x + 2)`, exito: true };
+        }
+        
+        // Si no se encontró patrón
+        return { error: `No se pudo identificar una integral por partes clara para: ${exprOriginal}\n\n💡 Formatos soportados:\n• x e^x\n• x senx\n• x cosx\n• lnx\n• x lnx\n• e^x senx\n• x^2 e^x`, exito: false };
+    }
+    
+    function mostrar(original, resultado) {
+        const container = document.getElementById('stepsContainer');
+        if (!resultado.exito) {
+            container.innerHTML = `<div class="error">❌ ${resultado.error}</div>`;
+            return;
+        }
+        let html = `<div style="margin-bottom: 1rem; background: #ff3333; padding: 0.8rem; border-radius: 1rem; border: 1px solid #ff3333; color:#000; font-weight:bold;">
+                        📌 <strong>Función original:</strong> ∫ ${original} dx
+                    </div>`;
+        html += `<div><strong>🔍 INTEGRACIÓN POR PARTES - PASO A PASO:</strong></div>`;
+        
+        resultado.pasos.forEach((paso, idx) => {
+            if (paso.includes("📌") || paso.includes("📐") || paso.includes("🔄")) {
+                html += `<div class="uv-box"><span class="step-number">${idx+1}</span> ${paso}</div>`;
+            } else {
+                html += `<div class="step"><span class="step-number">${idx+1}</span> ${paso}</div>`;
+            }
+        });
+        
+        html += `<div class="final-int">
+                    🧨 <strong>INTEGRAL RESUELTA POR PARTES:</strong> ${resultado.resultado} + C 🧨
+                 </div>`;
+        
+        container.innerHTML = html;
+    }
+    
+    // Eventos
+    document.getElementById('integrarBtn').addEventListener('click', () => {
+        let original = document.getElementById('funcInput').value.trim();
+        if (!original) {
+            document.getElementById('stepsContainer').innerHTML = `<div class="error">✍️ Escribe una función, carnal.</div>`;
+            return;
+        }
+        let resultado = integrarPorPartes(original);
+        mostrar(original, resultado);
+    });
+    
+    document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            let expr = btn.getAttribute('data-expr');
+            document.getElementById('funcInput').value = expr;
+            let resultado = integrarPorPartes(expr);
+            mostrar(expr, resultado);
+        });
+    });
+    
+    window.addEventListener('load', () => {
+        document.getElementById('integrarBtn').click();
+    });
+</script>
+</body>
+</html>
